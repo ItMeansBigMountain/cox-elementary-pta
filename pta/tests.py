@@ -2,7 +2,7 @@
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, Client
 from django.urls import reverse
-from pta.models import Announcement, Event, NewsletterIssue, VolunteerOpportunity, VolunteerInterest, DonationCampaign, SiteSettings
+from pta.models import Announcement, Event, NewsletterIssue, VolunteerOpportunity, VolunteerInterest, DonationCampaign, SiteSettings, Sponsor
 from django.utils import timezone
 from datetime import date
 
@@ -113,3 +113,12 @@ class PublicSiteBehaviorTests(TestCase):
         response = self.client.get(reverse('pta:fundraising'))
         self.assertContains(response, 'https://buy.stripe.com/test_123')
         self.assertContains(response, 'Donate with Stripe')
+
+    def test_sponsor_logo_upload_uses_database_backed_src(self):
+        DonationCampaign.objects.create(title='Fall Giving Campaign', goal_amount=10000, current_amount=6800, stripe_payment_link='https://buy.stripe.com/test_123', active=True)
+        image = SimpleUploadedFile('sponsor.png', b'fake sponsor bytes', content_type='image/png')
+        Sponsor.objects.create(name='Book Coastal Coffee Co', logo=image, website='https://example.com', level='Community Sponsor', active=True)
+        response = self.client.get(reverse('pta:fundraising'))
+        self.assertContains(response, 'Book Coastal Coffee Co')
+        self.assertContains(response, 'src="data:image/png;base64,')
+        self.assertNotContains(response, '/media/sponsors/sponsor.png')

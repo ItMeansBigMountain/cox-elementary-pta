@@ -177,9 +177,37 @@ class Announcement(TimeStampedModel):
 class Sponsor(TimeStampedModel):
     name=models.CharField(max_length=160)
     logo=models.ImageField(upload_to='sponsors/', blank=True)
+    logo_data=models.BinaryField(blank=True, null=True, editable=False)
+    logo_content_type=models.CharField(max_length=80, blank=True, editable=False)
+    logo_filename=models.CharField(max_length=255, blank=True, editable=False)
     website=models.URLField(blank=True)
     level=models.CharField(max_length=80, blank=True)
     active=models.BooleanField(default=True)
+
+    def save(self,*args,**kwargs):
+        if self.logo:
+            try:
+                self.logo.open('rb')
+                data = self.logo.read()
+                if data:
+                    self.logo_data = data
+                    guessed_type = getattr(self.logo.file, 'content_type', '') or mimetypes.guess_type(self.logo.name)[0] or 'image/png'
+                    self.logo_content_type = guessed_type
+                    self.logo_filename = self.logo.name
+                self.logo.seek(0)
+            except Exception:
+                # Keep any existing database-backed copy if host file storage is unavailable.
+                pass
+        super().save(*args,**kwargs)
+
+    @property
+    def logo_src(self):
+        if self.logo_data:
+            encoded = base64.b64encode(bytes(self.logo_data)).decode('ascii')
+            content_type = self.logo_content_type or 'image/png'
+            return f'data:{content_type};base64,{encoded}'
+        return ''
+
     def __str__(self): return self.name
 
 class DonationCampaign(TimeStampedModel):
