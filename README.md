@@ -1,46 +1,92 @@
-# Cox Elementary PTA Website Mockup
+# Cox Elementary PTA Website
 
-A modern, mobile-friendly static website for **Cox Elementary PTA** with eagle mascot branding, navy/gold colors, visual newsletter/flyer sections, and parent-friendly navigation.
+This repo now contains two versions:
 
-## Pages
+1. **Static preview** currently hosted by GitHub Pages from the root `index.html`/`events.html`/`volunteer.html` files.
+2. **Dynamic Django version** for production client handoff with Django Admin, database-backed content, volunteer interest capture, newsletter pages, resources, fundraising, and Stripe donation links.
 
-- `index.html` — homepage with hero, quick links, events, newsletter hub, volunteer spotlight, fundraising, student spotlight, about, footer
-- `events.html` — event calendar/list with category filters
-- `volunteer.html` — volunteer opportunities and draft interest form
+Live static preview:
 
-## Assets Included
+```text
+https://itmeansbigmountain.github.io/cox-elementary-pta/
+```
 
-The supplied mascot/logo/newsletter images were copied into `assets/` and used throughout the mockup.
+## Dynamic Django Features
 
-## Free Hosting Options
+- Admin panel at `/admin/`
+- Navbar order: Home, Newsletter, Events, Volunteer, Resources, Fundraising, About & Contact
+- Standalone pages:
+  - `/newsletter/`
+  - `/events/`
+  - `/volunteer/`
+  - `/resources/`
+  - `/fundraising/`
+  - `/about-contact/`
+- Newsletter issues sort newest-first by issue date.
+- Events are created and managed from Django Admin.
+- Volunteer opportunities are created and managed from Django Admin.
+- Volunteer interest forms save submissions for admin review.
+- Fundraising uses a Stripe Payment Link stored on the active Donation Campaign.
+- Resources/social links are editable via Site Settings.
 
-### Option A: GitHub Pages (free)
-1. Push this folder to a GitHub repository.
-2. In GitHub: **Settings → Pages**.
-3. Source: deploy from branch, select `main`, folder `/root`.
-4. GitHub provides a free URL like `https://username.github.io/repo-name/`.
-5. Later, add the client domain under **Settings → Pages → Custom domain** and update DNS with the values GitHub provides.
+## Local Django Development
 
-### Option B: Netlify Drop (free and very simple)
-1. Go to `https://app.netlify.com/drop`.
-2. Drag this entire folder into the page.
-3. Netlify gives a free preview URL immediately.
-4. Later, connect the purchased domain under **Domain management → Add custom domain**.
+```bash
+uv venv .venv
+. .venv/bin/activate
+uv pip install -r requirements.txt
+python manage.py migrate
+python manage.py seed_initial_content
+python manage.py createsuperuser
+python manage.py runserver
+```
 
-### Option C: Cloudflare Pages (free)
-1. Put files in GitHub.
-2. Create a Cloudflare Pages project from the repo.
-3. Framework preset: none/static; build command blank; output directory `/`.
-4. Add the domain later in Cloudflare Pages custom domains.
+Open:
 
-## Added Client Links
+```text
+http://127.0.0.1:8000/
+http://127.0.0.1:8000/admin/
+```
+
+## Tests
+
+```bash
+. .venv/bin/activate
+python manage.py test
+```
+
+## Production Hosting
+
+GitHub Pages cannot run Django. For the dynamic/admin version, deploy to Render, Railway, Fly.io, or PythonAnywhere.
+
+Recommended: **Render**.
+
+A starter `render.yaml` is included.
+
+## Custom Domain
+
+See:
+
+```text
+docs/client-admin-guide.md
+```
+
+Short version:
+
+1. Deploy the Django app to Render.
+2. Add the client domain in Render → Settings → Custom Domains.
+3. Copy Render’s DNS record into the domain registrar.
+4. Enable HTTPS after DNS verifies.
+
+## Stripe Donation Setup
+
+1. Create a Stripe Payment Link in the PTA/client Stripe dashboard.
+2. Go to Django Admin → Donation Campaigns.
+3. Paste the Stripe link into `Stripe payment link`.
+4. Keep card processing on Stripe, not inside Django.
+
+## Client Links
 
 - Instagram: https://www.instagram.com/coxeagles_pta?igsh=NTc4MTIwNjQ2YQ%3D%3D
 - PTA Linktree: https://linktr.ee/coxeaglespta?utm_source=qr_code&utm_medium=social&utm_content=link_in_bio&fbclid=PAdGRleAR2JhVleHRuA2FlbQIxMQBzcnRjBmFwcF9pZA8xMjQwMjQ1NzQyODc0MTQAAae1BgmXhU6iZCbfkE3M25e2aPKDtXPhVL9AY8M3pMgjL7N-2pX_VOuTQdXZUA_aem_P5UX-Hm-RUJpt8_7Ss4bQw
 - Official Cox contact page: https://cox.fvsd.us/apps/contact/
-
-## Notes for Client Review
-
-- Form buttons and resource links are placeholders until final URLs are available.
-- Hero family imagery is represented as a polished brand collage using the supplied eagle assets; real school/family photos can replace this later.
-- Newsletter hub is designed to support PDF/image flyers and monthly newsletter previews.

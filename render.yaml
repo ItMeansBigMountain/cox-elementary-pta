@@ -1,0 +1,17 @@
+
+services:
+  - type: web
+    name: cox-elementary-pta
+    env: python
+    plan: free
+    buildCommand: "uv pip install --system -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate"
+    startCommand: "gunicorn coxpta.wsgi:application"
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: "cox-elementary-pta.onrender.com,www.your-domain.com,your-domain.com"
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://cox-elementary-pta.onrender.com,https://www.your-domain.com,https://your-domain.com"
