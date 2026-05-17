@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block title %}Printable {{ announcement.title }} | Cox Elementary PTA{% endblock %}
+{% block content %}
+<section class="print-flyer-wrap"><div class="container"><article class="print-flyer"><div class="print-mark">Cox Elementary PTA</div>{% if announcement.image_src %}<img class="print-flyer-image" src="{{ announcement.image_src }}" alt="{{ announcement.title }}">{% endif %}<div class="print-flyer-copy"><span class="eyebrow">{{ announcement.get_kind_display }}</span><h1>{{ announcement.title }}</h1><p>{{ announcement.short_text|linebreaksbr }}</p></div><div class="print-share-row"><div><strong>Scan for details</strong><br><span>{{ request.build_absolute_uri }}</span></div><img class="qr-img" src="https://quickchart.io/qr?size=180&margin=2&text={{ request.build_absolute_uri|urlencode }}" alt="QR code for {{ announcement.title }}"></div></article><div class="hero-actions no-print print-actions"><button class="btn primary" onclick="window.print()">Print flyer</button><a class="btn light" href="{{ announcement.get_absolute_url }}">Back to web view</a></div></div></section>
+{% endblock %}

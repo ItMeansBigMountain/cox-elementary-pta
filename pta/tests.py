@@ -62,8 +62,27 @@ class PublicSiteBehaviorTests(TestCase):
         self.assertContains(response, 'src="data:image/png;base64,')
         self.assertNotContains(response, '/media/announcements/jump.png')
 
+    def test_announcement_has_share_and_print_pages_with_qr_codes(self):
+        announcement = Announcement.objects.create(
+            title='Jump for Jackets',
+            kind='announcement',
+            short_text='Bring a new jacket or sweater to participate.',
+            publish_date=date.today(),
+            published=True,
+        )
+        detail = self.client.get(announcement.get_absolute_url())
+        printable = self.client.get(announcement.get_print_url())
+        self.assertContains(detail, 'Printable flyer + QR')
+        self.assertContains(detail, 'quickchart.io/qr')
+        self.assertContains(printable, 'Print flyer')
+        self.assertContains(printable, 'quickchart.io/qr')
+
     def test_volunteer_interest_form_creates_admin_reviewable_submission(self):
         opp = VolunteerOpportunity.objects.create(title='Book Fair Helper', slug='book-fair-helper', time_commitment='1 hour', description='Help students', active=True)
+        response = self.client.get(reverse('pta:volunteer'))
+        html = response.content.decode()
+        self.assertIn('Book Fair Helper', html)
+        self.assertNotIn('---------', html)
         response = self.client.post(reverse('pta:volunteer'), {
             'name': 'Jane Parent',
             'email': 'jane@example.com',

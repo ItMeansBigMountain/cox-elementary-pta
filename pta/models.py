@@ -96,6 +96,8 @@ class NewsletterIssue(TimeStampedModel):
     featured = models.BooleanField(default=False)
     class Meta:
         ordering = ['-issue_date','-created_at']
+        verbose_name = 'Newsletter'
+        verbose_name_plural = 'Newsletters'
     def save(self,*args,**kwargs):
         if not self.slug: self.slug = slugify(self.title)
         super().save(*args,**kwargs)
@@ -143,6 +145,8 @@ class Announcement(TimeStampedModel):
             return f'data:{content_type};base64,{encoded}'
         return ''
 
+    def get_absolute_url(self): return reverse('pta:announcement_detail', args=[self.pk])
+    def get_print_url(self): return reverse('pta:announcement_print', args=[self.pk])
     def __str__(self): return self.title
 
 class Sponsor(TimeStampedModel):

@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block title %}{{ announcement.title }} | Announcement{% endblock %}
+{% block content %}
+<section class="share-hero"><div class="container share-layout"><article class="share-copy reveal"><span class="eyebrow">{{ announcement.get_kind_display }}</span><h1>{{ announcement.title }}</h1><p>{{ announcement.short_text|linebreaksbr }}</p><div class="hero-actions no-print"><a class="btn primary" href="{{ announcement.get_print_url }}">Printable flyer + QR</a>{% if announcement.cta_url %}<a class="btn gold" href="{{ announcement.cta_url }}" target="_blank" rel="noopener">Open link</a>{% endif %}<button class="btn ghost" type="button" onclick="navigator.share?navigator.share({title:document.title,url:location.href}):navigator.clipboard.writeText(location.href)">Share</button></div></article><aside class="qr-card card reveal no-print"><h2>Scan & share</h2><img class="qr-img" src="https://quickchart.io/qr?size=240&margin=2&text={{ request.build_absolute_uri|urlencode }}" alt="QR code for {{ announcement.title }}"><p>Print this QR or text it to families so they can open the announcement instantly.</p></aside></div></section>
+{% endblock %}

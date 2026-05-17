@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}Newsletter | Cox Elementary PTA{% endblock %}
 {% block content %}
-<section class="page-hero"><div class="container"><div><span class="eyebrow">Newsletter</span><h1>Latest PTA newsletters, newest first.</h1><p>This page is for newsletter issues only. Announcements and flyers now appear on the homepage so families see them right away.</p></div></div></section>
-<section><div class="container"><div class="masonry">{% for issue in issues %}<article class="pin reveal">{% if issue.cover_image %}<img src="{{ issue.cover_image.url }}" alt="{{ issue.title }}">{% endif %}<div class="pin-body"><span class="eyebrow">{{ issue.issue_date|date:'F Y' }}</span><h3>{{ issue.title }}</h3><p>{{ issue.summary }}</p><a class="btn primary" href="{{ issue.get_absolute_url }}">Read issue</a></div></article>{% empty %}<p>No newsletters have been published yet.</p>{% endfor %}</div></div></section>
+<section class="page-hero"><div class="container"><div><span class="eyebrow">Newsletter</span><h1>Latest PTA newsletters, newest first.</h1><p>This page is for newsletters and PTA updates. Announcements and flyers now appear on the homepage so families see them right away.</p></div></div></section>
+<section><div class="container"><div class="masonry">{% for issue in issues %}<article class="pin reveal">{% if issue.cover_image %}<img src="{{ issue.cover_image.url }}" alt="{{ issue.title }}">{% endif %}<div class="pin-body"><span class="eyebrow">{{ issue.issue_date|date:'F Y' }}</span><h3>{{ issue.title }}</h3><p>{{ issue.summary }}</p><a class="btn primary" href="{{ issue.get_absolute_url }}">Read newsletter</a></div></article>{% empty %}<p>No newsletters have been published yet.</p>{% endfor %}</div></div></section>
 {% endblock %}

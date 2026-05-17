@@ -29,7 +29,15 @@ def newsletter(request):
     return render(request, 'pta/newsletter.html', {'issues': NewsletterIssue.objects.filter(published=True)})
 
 def newsletter_detail(request, slug):
-    return render(request, 'pta/newsletter_detail.html', {'issue': get_object_or_404(NewsletterIssue, slug=slug, published=True)})
+    return render(request, 'pta/newsletter_detail.html', {'newsletter': get_object_or_404(NewsletterIssue, slug=slug, published=True)})
+
+def announcement_detail(request, pk):
+    announcement = get_object_or_404(active_announcements(), pk=pk)
+    return render(request, 'pta/announcement_detail.html', {'announcement': announcement})
+
+def announcement_print(request, pk):
+    announcement = get_object_or_404(active_announcements(), pk=pk)
+    return render(request, 'pta/announcement_print.html', {'announcement': announcement})
 
 def events(request):
     category=request.GET.get('category')
