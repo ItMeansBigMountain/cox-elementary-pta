@@ -1,12 +1,13 @@
-
 services:
   - type: web
     name: cox-elementary-pta
     env: python
     plan: free
-    buildCommand: "uv pip install --system -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate"
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate"
     startCommand: "gunicorn coxpta.wsgi:application"
     envVars:
+      - key: PYTHON_VERSION
+        value: "3.13.5"
       - key: DEBUG
         value: "False"
       - key: SECRET_KEY
@@ -15,3 +16,13 @@ services:
         value: "cox-elementary-pta.onrender.com,www.your-domain.com,your-domain.com"
       - key: CSRF_TRUSTED_ORIGINS
         value: "https://cox-elementary-pta.onrender.com,https://www.your-domain.com,https://your-domain.com"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cox-elementary-pta-db
+          property: connectionString
+
+databases:
+  - name: cox-elementary-pta-db
+    plan: free
+    databaseName: cox_elementary_pta
+    user: cox_elementary_pta
