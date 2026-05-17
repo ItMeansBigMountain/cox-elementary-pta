@@ -1,4 +1,5 @@
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, Client
 from django.urls import reverse
 from pta.models import Announcement, Event, NewsletterIssue, VolunteerOpportunity, VolunteerInterest, DonationCampaign, SiteSettings
@@ -42,6 +43,24 @@ class PublicSiteBehaviorTests(TestCase):
         self.assertContains(home_response, 'Jump for Jackets')
         self.assertContains(home_response, 'Bring a new jacket or sweater')
         self.assertNotContains(newsletter_response, 'Jump for Jackets')
+
+    def test_announcement_uploads_are_embedded_from_database_for_render_free(self):
+        one_by_one_png = (
+            b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01'
+            b'\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc```\x00\x00\x00\x04\x00\x01'
+            b'\xf6\x178U\x00\x00\x00\x00IEND\xaeB`\x82'
+        )
+        Announcement.objects.create(
+            title='Jump for Jackets',
+            kind='announcement',
+            short_text='Bring a new jacket or sweater to participate.',
+            image=SimpleUploadedFile('jump.png', one_by_one_png, content_type='image/png'),
+            publish_date=date.today(),
+            published=True,
+        )
+        response = self.client.get(reverse('pta:home'))
+        self.assertContains(response, 'src="data:image/png;base64,')
+        self.assertNotContains(response, '/media/announcements/jump.png')
 
     def test_volunteer_interest_form_creates_admin_reviewable_submission(self):
         opp = VolunteerOpportunity.objects.create(title='Book Fair Helper', slug='book-fair-helper', time_commitment='1 hour', description='Help students', active=True)

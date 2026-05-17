@@ -1,4 +1,7 @@
 
+import base64
+import mimetypes
+
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -105,6 +108,9 @@ class Announcement(TimeStampedModel):
     kind=models.CharField(max_length=20, choices=TYPE_CHOICES, default='announcement')
     short_text=models.TextField(blank=True)
     image=models.ImageField(upload_to='announcements/', blank=True)
+    image_data=models.BinaryField(blank=True, null=True, editable=False)
+    image_content_type=models.CharField(max_length=80, blank=True, editable=False)
+    image_filename=models.CharField(max_length=255, blank=True, editable=False)
     file=models.FileField(upload_to='announcements/files/', blank=True)
     cta_url=models.URLField(blank=True)
     publish_date=models.DateField()
@@ -112,6 +118,33 @@ class Announcement(TimeStampedModel):
     published=models.BooleanField(default=True)
     class Meta:
         ordering=['-publish_date','title']
+
+    def save(self,*args,**kwargs):
+        if self.image:
+            try:
+                self.image.open('rb')
+                data = self.image.read()
+                if data:
+                    self.image_data = data
+                    guessed_type = getattr(self.image.file, 'content_type', '') or mimetypes.guess_type(self.image.name)[0] or 'image/png'
+                    self.image_content_type = guessed_type
+                    self.image_filename = self.image.name
+                self.image.seek(0)
+            except Exception:
+                # If storage cannot read the file, keep any existing database-backed copy.
+                pass
+        super().save(*args,**kwargs)
+
+    @property
+    def image_src(self):
+        if self.image_data:
+            encoded = base64.b64encode(bytes(self.image_data)).decode('ascii')
+            content_type = self.image_content_type or 'image/png'
+            return f'data:{content_type};base64,{encoded}'
+        if self.image:
+            return self.image.url
+        return ''
+
     def __str__(self): return self.title
 
 class Sponsor(TimeStampedModel):
