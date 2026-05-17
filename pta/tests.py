@@ -4,7 +4,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from pta.models import Announcement, Event, NewsletterIssue, VolunteerOpportunity, VolunteerInterest, DonationCampaign, SiteSettings, Sponsor
 from django.utils import timezone
-from datetime import date
+from datetime import date, timedelta
 
 class PublicSiteBehaviorTests(TestCase):
     def setUp(self):
@@ -40,6 +40,42 @@ class PublicSiteBehaviorTests(TestCase):
         response = self.client.get(reverse('pta:newsletter'))
         html = response.content.decode()
         self.assertLess(html.index('October Newsletter'), html.index('September Newsletter'))
+
+    def test_events_page_groups_events_by_month_and_collapses_past_months(self):
+        today = timezone.localdate()
+        current_month = today.replace(day=10)
+        past_month = (today.replace(day=1) - timedelta(days=1)).replace(day=10)
+        future_month = (today.replace(day=28) + timedelta(days=8)).replace(day=10)
+        Event.objects.create(title='Past Family Night', slug='past-family-night', date=past_month, short_description='Already happened', published=True)
+        Event.objects.create(title='This Month Book Fair', slug='this-month-book-fair', date=current_month, short_description='Coming soon', published=True)
+        Event.objects.create(title='Future STEM Night', slug='future-stem-night', date=future_month, short_description='Later', published=True)
+
+        response = self.client.get(reverse('pta:events'))
+        html = response.content.decode()
+        months = response.context['event_months']
+
+        self.assertContains(response, 'events-accordion')
+        self.assertContains(response, current_month.strftime('%B %Y'))
+        self.assertContains(response, past_month.strftime('%B %Y'))
+        self.assertContains(response, future_month.strftime('%B %Y'))
+        self.assertContains(response, 'This month')
+        self.assertContains(response, 'Past')
+        current_group = next(group for group in months if group['is_current'])
+        past_group = next(group for group in months if group['is_past'])
+        self.assertTrue(current_group['is_open'])
+        self.assertFalse(past_group['is_open'])
+        self.assertIn(f'<details class="event-month reveal past-month ', html)
+
+    def test_events_page_opens_first_future_month_when_current_has_no_events(self):
+        today = timezone.localdate()
+        past_month = (today.replace(day=1) - timedelta(days=1)).replace(day=10)
+        future_month = (today.replace(day=28) + timedelta(days=8)).replace(day=10)
+        Event.objects.create(title='Past Meeting', slug='past-meeting', date=past_month, short_description='Already happened', published=True)
+        Event.objects.create(title='Next Book Fair', slug='next-book-fair', date=future_month, short_description='Coming soon', published=True)
+
+        response = self.client.get(reverse('pta:events'))
+        future_group = next(group for group in response.context['event_months'] if group['label'] == future_month.strftime('%B %Y'))
+        self.assertTrue(future_group['is_open'])
 
     def test_announcements_show_on_homepage_not_newsletter_page(self):
         Announcement.objects.create(

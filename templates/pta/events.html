@@ -1,1 +1,54 @@
-{% extends 'base.html' %}{% block title %}Events | Cox Elementary PTA{% endblock %}{% block content %}<section class="page-hero"><div class="container"><div><span class="eyebrow">Events</span><h1>Plan for what’s happening at Cox.</h1><p>Events are managed in the admin panel and appear here automatically.</p></div></div></section><section><div class="container"><div class="filters"><a class="filter {% if not category %}active{% endif %}" href="{% url 'pta:events' %}">All</a>{% for key,label in categories %}<a class="filter {% if category == key %}active{% endif %}" href="?category={{ key }}">{{ label }}</a>{% endfor %}</div><div class="calendar-list">{% for event in events %}<article class="wide-event reveal" data-category="{{ event.category }}"><div class="date-box">{{ event.date|date:'M' }}<span>{{ event.date|date:'j' }}</span></div><div><span class="tag">{{ event.get_category_display }}</span><h2>{{ event.title }}</h2><p>{{ event.short_description }}</p></div><a class="btn primary" href="{{ event.get_absolute_url }}">Details</a></article>{% empty %}<p>No events are published yet.</p>{% endfor %}</div></div></section>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Events | Cox Elementary PTA{% endblock %}
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <div>
+      <span class="eyebrow">Events</span>
+      <h1>See this month first. Open other months only when you need them.</h1>
+      <p>Events are automatically grouped by month so parents can quickly see what is coming up without scrolling through a long list.</p>
+    </div>
+  </div>
+</section>
+<section>
+  <div class="container">
+    <div class="filters" aria-label="Event filters">
+      <a class="filter {% if not category %}active{% endif %}" href="{% url 'pta:events' %}">All</a>
+      {% for key,label in categories %}<a class="filter {% if category == key %}active{% endif %}" href="?category={{ key }}">{{ label }}</a>{% endfor %}
+    </div>
+
+    <div class="events-accordion" data-accordion="events">
+      {% for month in event_months %}
+      <details class="event-month reveal {% if month.is_past %}past-month{% endif %} {% if month.is_current %}current-month{% endif %}" {% if month.is_open %}open{% endif %}>
+        <summary>
+          <span class="month-title">
+            <span class="month-arrow" aria-hidden="true">⌄</span>
+            <span>{{ month.label }}</span>
+          </span>
+          <span class="month-meta">
+            {% if month.is_current %}<strong>This month</strong>{% elif month.is_past %}<strong>Past</strong>{% else %}<strong>Upcoming</strong>{% endif %}
+            {{ month.events|length }} event{{ month.events|length|pluralize }}
+          </span>
+        </summary>
+        <div class="calendar-list month-events">
+          {% for event in month.events %}
+          <article class="wide-event reveal" data-category="{{ event.category }}">
+            <div class="date-box">{{ event.date|date:'M' }}<span>{{ event.date|date:'j' }}</span></div>
+            <div>
+              <span class="tag">{{ event.get_category_display }}</span>
+              <h2>{{ event.title }}</h2>
+              {% if event.end_date and event.end_date != event.date %}<p class="microcopy">{{ event.date|date:'M j' }}–{{ event.end_date|date:'M j' }}</p>{% endif %}
+              <p>{{ event.short_description }}</p>
+            </div>
+            <a class="btn primary" href="{{ event.get_absolute_url }}">Details</a>
+          </article>
+          {% endfor %}
+        </div>
+      </details>
+      {% empty %}
+      <div class="card"><h2>No events are published yet.</h2><p>Check back soon for upcoming PTA events.</p></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

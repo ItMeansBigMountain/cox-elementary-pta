@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from collections import OrderedDict
 from .forms import VolunteerInterestForm
 from .models import Announcement, DonationCampaign, Event, NewsletterIssue, SiteSettings, Sponsor, VolunteerOpportunity
 
@@ -40,10 +41,47 @@ def announcement_print(request, pk):
     return render(request, 'pta/announcement_print.html', {'announcement': announcement})
 
 def events(request):
-    category=request.GET.get('category')
-    qs=Event.objects.filter(published=True)
-    if category: qs=qs.filter(category=category)
-    return render(request, 'pta/events.html', {'events': qs, 'category': category, 'categories': Event.CATEGORY_CHOICES})
+    category = request.GET.get('category')
+    qs = Event.objects.filter(published=True)
+    if category:
+        qs = qs.filter(category=category)
+
+    today = timezone.localdate()
+    current_key = (today.year, today.month)
+    grouped = OrderedDict()
+    for event in qs:
+        key = (event.date.year, event.date.month)
+        if key not in grouped:
+            grouped[key] = {
+                'key': f'{event.date.year}-{event.date.month:02d}',
+                'label': event.date.strftime('%B %Y'),
+                'events': [],
+                'is_past': key < current_key,
+                'is_current': key == current_key,
+            }
+        grouped[key]['events'].append(event)
+
+    open_key = None
+    if current_key in grouped:
+        open_key = grouped[current_key]['key']
+    else:
+        future_groups = [group for key, group in grouped.items() if key > current_key]
+        if future_groups:
+            open_key = future_groups[0]['key']
+        elif grouped:
+            open_key = next(reversed(grouped.values()))['key']
+
+    event_months = []
+    for group in grouped.values():
+        group['is_open'] = group['key'] == open_key
+        event_months.append(group)
+
+    return render(request, 'pta/events.html', {
+        'events': qs,
+        'event_months': event_months,
+        'category': category,
+        'categories': Event.CATEGORY_CHOICES,
+    })
 
 def event_detail(request, slug):
     return render(request, 'pta/event_detail.html', {'event': get_object_or_404(Event, slug=slug, published=True)})
