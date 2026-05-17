@@ -44,23 +44,35 @@ class PublicSiteBehaviorTests(TestCase):
         self.assertContains(home_response, 'Bring a new jacket or sweater')
         self.assertNotContains(newsletter_response, 'Jump for Jackets')
 
-    def test_announcement_uploads_are_embedded_from_database_for_render_free(self):
-        one_by_one_png = (
-            b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01'
-            b'\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc```\x00\x00\x00\x04\x00\x01'
-            b'\xf6\x178U\x00\x00\x00\x00IEND\xaeB`\x82'
-        )
+    def test_announcement_image_upload_uses_database_backed_src(self):
+        image = SimpleUploadedFile('jump.png', b'fake image bytes', content_type='image/png')
         Announcement.objects.create(
             title='Jump for Jackets',
             kind='announcement',
             short_text='Bring a new jacket or sweater to participate.',
-            image=SimpleUploadedFile('jump.png', one_by_one_png, content_type='image/png'),
+            image=image,
             publish_date=date.today(),
             published=True,
         )
         response = self.client.get(reverse('pta:home'))
         self.assertContains(response, 'src="data:image/png;base64,')
         self.assertNotContains(response, '/media/announcements/jump.png')
+
+    def test_newsletter_cover_upload_uses_database_backed_src(self):
+        image = SimpleUploadedFile('newsletter.png', b'fake newsletter bytes', content_type='image/png')
+        newsletter = NewsletterIssue.objects.create(
+            title='May Newsletter',
+            issue_date=date.today(),
+            summary='Growing Together',
+            cover_image=image,
+            published=True,
+        )
+        listing = self.client.get(reverse('pta:newsletter'))
+        detail = self.client.get(newsletter.get_absolute_url())
+        self.assertContains(listing, 'src="data:image/png;base64,')
+        self.assertContains(detail, 'src="data:image/png;base64,')
+        self.assertNotContains(listing, '/media/newsletters/covers/newsletter.png')
+        self.assertNotContains(detail, '/media/newsletters/covers/newsletter.png')
 
     def test_announcement_has_share_and_print_pages_with_qr_codes(self):
         announcement = Announcement.objects.create(

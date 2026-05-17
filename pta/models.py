@@ -90,6 +90,9 @@ class NewsletterIssue(TimeStampedModel):
     issue_date = models.DateField(help_text='Used for ordering. Latest appears first.')
     summary = models.TextField(blank=True)
     cover_image = models.ImageField(upload_to='newsletters/covers/', blank=True)
+    cover_image_data = models.BinaryField(blank=True, null=True, editable=False)
+    cover_image_content_type = models.CharField(max_length=80, blank=True, editable=False)
+    cover_image_filename = models.CharField(max_length=255, blank=True, editable=False)
     pdf = models.FileField(upload_to='newsletters/files/', blank=True)
     external_url = models.URLField(blank=True)
     published = models.BooleanField(default=True)
@@ -100,7 +103,29 @@ class NewsletterIssue(TimeStampedModel):
         verbose_name_plural = 'Newsletters'
     def save(self,*args,**kwargs):
         if not self.slug: self.slug = slugify(self.title)
+        if self.cover_image:
+            try:
+                self.cover_image.open('rb')
+                data = self.cover_image.read()
+                if data:
+                    self.cover_image_data = data
+                    guessed_type = getattr(self.cover_image.file, 'content_type', '') or mimetypes.guess_type(self.cover_image.name)[0] or 'image/png'
+                    self.cover_image_content_type = guessed_type
+                    self.cover_image_filename = self.cover_image.name
+                self.cover_image.seek(0)
+            except Exception:
+                # If Render's temporary storage cannot read the file, keep any existing database-backed copy.
+                pass
         super().save(*args,**kwargs)
+
+    @property
+    def cover_image_src(self):
+        if self.cover_image_data:
+            encoded = base64.b64encode(bytes(self.cover_image_data)).decode('ascii')
+            content_type = self.cover_image_content_type or 'image/png'
+            return f'data:{content_type};base64,{encoded}'
+        return ''
+
     def get_absolute_url(self): return reverse('pta:newsletter_detail', args=[self.slug])
     def __str__(self): return self.title
 
