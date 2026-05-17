@@ -141,8 +141,6 @@ class Announcement(TimeStampedModel):
             encoded = base64.b64encode(bytes(self.image_data)).decode('ascii')
             content_type = self.image_content_type or 'image/png'
             return f'data:{content_type};base64,{encoded}'
-        if self.image:
-            return self.image.url
         return ''
 
     def __str__(self): return self.title
