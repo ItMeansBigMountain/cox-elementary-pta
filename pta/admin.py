@@ -2,6 +2,8 @@
 from django.contrib import admin
 from .models import Announcement, DonationCampaign, Event, NewsletterIssue, SiteSettings, Sponsor, VolunteerInterest, VolunteerOpportunity
 
+admin.site.index_template = 'admin/pta_index.html'
+
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
     fieldsets = ((None, {'fields': ('pta_name','school_name','tagline','hero_message','contact_email')}),('Links', {'fields': ('instagram_url','linktree_url','school_contact_url','lunch_menu_url','attendance_url','spirit_wear_url','calendar_url')}),('Images', {'fields': ('logo','mascot')}))
@@ -27,6 +29,14 @@ class VolunteerInterestAdmin(admin.ModelAdmin):
     list_filter=('reviewed','opportunity','created_at')
     search_fields=('name','email','phone','message')
     actions=['mark_reviewed']
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        unreviewed_count = VolunteerInterest.objects.filter(reviewed=False).count()
+        extra_context['title'] = f'Volunteer interest submissions — {unreviewed_count} unreviewed'
+        extra_context['unreviewed_count'] = unreviewed_count
+        return super().changelist_view(request, extra_context=extra_context)
+
     @admin.action(description='Mark selected submissions reviewed')
     def mark_reviewed(self, request, queryset): queryset.update(reviewed=True)
 

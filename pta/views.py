@@ -1,11 +1,20 @@
 
 from django.contrib import messages
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from .forms import VolunteerInterestForm
 from .models import Announcement, DonationCampaign, Event, NewsletterIssue, SiteSettings, Sponsor, VolunteerOpportunity
 
 def get_settings():
     return SiteSettings.objects.first()
+
+def active_announcements():
+    today = timezone.localdate()
+    return Announcement.objects.filter(
+        published=True,
+        publish_date__lte=today,
+    ).filter(Q(expires_date__isnull=True) | Q(expires_date__gte=today))
 
 def home(request):
     return render(request, 'pta/home.html', {
@@ -13,11 +22,11 @@ def home(request):
         'latest_newsletter': NewsletterIssue.objects.filter(published=True).first(),
         'opportunities': VolunteerOpportunity.objects.filter(active=True)[:3],
         'campaign': DonationCampaign.objects.filter(active=True).first(),
-        'announcements': Announcement.objects.filter(published=True)[:4],
+        'announcements': active_announcements()[:4],
     })
 
 def newsletter(request):
-    return render(request, 'pta/newsletter.html', {'issues': NewsletterIssue.objects.filter(published=True), 'announcements': Announcement.objects.filter(published=True)})
+    return render(request, 'pta/newsletter.html', {'issues': NewsletterIssue.objects.filter(published=True)})
 
 def newsletter_detail(request, slug):
     return render(request, 'pta/newsletter_detail.html', {'issue': get_object_or_404(NewsletterIssue, slug=slug, published=True)})

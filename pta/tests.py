@@ -1,7 +1,7 @@
 
 from django.test import TestCase, Client
 from django.urls import reverse
-from pta.models import Event, NewsletterIssue, VolunteerOpportunity, VolunteerInterest, DonationCampaign, SiteSettings
+from pta.models import Announcement, Event, NewsletterIssue, VolunteerOpportunity, VolunteerInterest, DonationCampaign, SiteSettings
 from django.utils import timezone
 from datetime import date
 
@@ -28,6 +28,20 @@ class PublicSiteBehaviorTests(TestCase):
         response = self.client.get(reverse('pta:newsletter'))
         html = response.content.decode()
         self.assertLess(html.index('October Newsletter'), html.index('September Newsletter'))
+
+    def test_announcements_show_on_homepage_not_newsletter_page(self):
+        Announcement.objects.create(
+            title='Jump for Jackets',
+            kind='announcement',
+            short_text='Bring a new jacket or sweater to participate.',
+            publish_date=date.today(),
+            published=True,
+        )
+        home_response = self.client.get(reverse('pta:home'))
+        newsletter_response = self.client.get(reverse('pta:newsletter'))
+        self.assertContains(home_response, 'Jump for Jackets')
+        self.assertContains(home_response, 'Bring a new jacket or sweater')
+        self.assertNotContains(newsletter_response, 'Jump for Jackets')
 
     def test_volunteer_interest_form_creates_admin_reviewable_submission(self):
         opp = VolunteerOpportunity.objects.create(title='Book Fair Helper', slug='book-fair-helper', time_commitment='1 hour', description='Help students', active=True)
