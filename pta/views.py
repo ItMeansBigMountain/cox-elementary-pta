@@ -7,7 +7,7 @@ from .forms import VolunteerInterestForm
 from .models import Announcement, DonationCampaign, Event, NewsletterIssue, SiteSettings, Sponsor, VolunteerOpportunity
 
 def get_settings():
-    return SiteSettings.objects.first()
+    return SiteSettings.objects.first() or SiteSettings()
 
 def active_announcements():
     today = timezone.localdate()
@@ -61,6 +61,9 @@ def volunteer(request):
 
 def resources(request):
     return render(request, 'pta/resources.html')
+
+def join_pta(request):
+    return render(request, 'pta/join_pta.html', {'settings': get_settings()})
 
 def fundraising(request):
     return render(request, 'pta/fundraising.html', {'campaign': DonationCampaign.objects.filter(active=True).first(), 'sponsors': Sponsor.objects.filter(active=True)})

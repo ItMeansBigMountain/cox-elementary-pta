@@ -6,7 +6,7 @@ admin.site.index_template = 'admin/pta_index.html'
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
-    fieldsets = ((None, {'fields': ('pta_name','school_name','tagline','hero_message','contact_email')}),('Links', {'fields': ('instagram_url','linktree_url','school_contact_url','lunch_menu_url','attendance_url','spirit_wear_url','calendar_url')}),('Images', {'fields': ('logo','mascot')}))
+    fieldsets = ((None, {'fields': ('pta_name','school_name','tagline','hero_message','contact_email')}),('Membership', {'fields': ('membership_fee','membership_payment_link'), 'description': 'Use this for the Join PTA page. Paste a Stripe Payment Link for the flat membership fee.'}),('Links', {'fields': ('instagram_url','linktree_url','school_contact_url','lunch_menu_url','attendance_url','spirit_wear_url','calendar_url')}),('Images', {'fields': ('logo','mascot')}))
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):

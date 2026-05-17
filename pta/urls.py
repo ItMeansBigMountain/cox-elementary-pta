@@ -11,6 +11,7 @@ urlpatterns=[
     path('events/', views.events, name='events'),
     path('events/<slug:slug>/', views.event_detail, name='event_detail'),
     path('volunteer/', views.volunteer, name='volunteer'),
+    path('join-pta/', views.join_pta, name='join_pta'),
     path('resources/', views.resources, name='resources'),
     path('fundraising/', views.fundraising, name='fundraising'),
     path('about-contact/', views.about_contact, name='about_contact'),

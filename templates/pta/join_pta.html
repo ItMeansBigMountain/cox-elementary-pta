@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Join PTA | Cox Elementary PTA{% endblock %}
+{% block content %}
+<section class="join-hero">
+  <div class="container join-shell">
+    <div class="join-copy reveal">
+      <span class="eyebrow">Join Cox PTA</span>
+      <h1>One small membership. A bigger circle of support.</h1>
+      <p class="lead">Your <strong>${{ settings.membership_fee|floatformat:0 }}</strong> PTA membership helps Cox families stay connected, supports school spirit, and gives students more people cheering them on.</p>
+      <div class="hero-actions">
+        {% if settings.membership_payment_link %}
+          <a class="btn gold" href="{{ settings.membership_payment_link }}" target="_blank" rel="noopener">Join PTA for ${{ settings.membership_fee|floatformat:0 }}</a>
+        {% else %}
+          <a class="btn gold disabled" aria-disabled="true">Payment link coming soon</a>
+        {% endif %}
+        <a class="btn light" href="{% url 'pta:volunteer' %}">Volunteer too</a>
+      </div>
+      <p class="microcopy">Low pressure. High impact. You do not need to volunteer every week to belong.</p>
+    </div>
+    <aside class="join-card reveal" aria-label="Membership benefits">
+      <div class="join-price"><span>$</span>{{ settings.membership_fee|floatformat:0 }}<small>flat fee</small></div>
+      <h2>Membership helps create momentum.</h2>
+      <ul class="check-list">
+        <li>Supports family events and school spirit</li>
+        <li>Helps fund student-centered enrichment</li>
+        <li>Strengthens communication between home and school</li>
+        <li>Shows teachers and students that families are involved</li>
+      </ul>
+    </aside>
+  </div>
+</section>
+<section>
+  <div class="container">
+    <div class="section-head reveal"><div><span class="eyebrow">Why join?</span><h2>Parents say yes when the next step feels simple.</h2><p>Membership is designed as the lowest-friction way to participate: one flat fee, one clear action, and an invitation to help when life allows.</p></div></div>
+    <div class="cards three">
+      <article class="card reveal"><div class="icon">🎒</div><h3>120+ family supporters</h3><p>Social proof helps new families feel like they are joining a caring group, not signing up alone.</p></article>
+      <article class="card reveal"><div class="icon">📚</div><h3>Student-centered impact</h3><p>Every membership reinforces classroom support, events, appreciation, and enrichment.</p></article>
+      <article class="card reveal"><div class="icon">❤️</div><h3>No-pressure belonging</h3><p>Join first. Volunteer later if it fits. Small actions still make a real school impact.</p></article>
+    </div>
+  </div>
+</section>
+<section class="cta-band">
+  <div class="container cta-inner">
+    <div><span class="eyebrow">Ready?</span><h2>Become part of the Cox PTA community.</h2><p>It takes less than a minute to start supporting students, teachers, and family connection.</p></div>
+    {% if settings.membership_payment_link %}
+      <a class="btn gold" href="{{ settings.membership_payment_link }}" target="_blank" rel="noopener">Join PTA for ${{ settings.membership_fee|floatformat:0 }}</a>
+    {% else %}
+      <a class="btn gold disabled" aria-disabled="true">Payment link coming soon</a>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

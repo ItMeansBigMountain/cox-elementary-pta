@@ -19,9 +19,20 @@ class PublicSiteBehaviorTests(TestCase):
     def test_nav_order_is_home_newsletter_events_volunteer_then_other_pages(self):
         response = self.client.get(reverse('pta:home'))
         self.assertContains(response, 'Home')
+        self.assertContains(response, 'Join PTA $15')
         html = response.content.decode()
         order = [html.index('>Home<'), html.index('>Newsletter<'), html.index('>Events<'), html.index('>Volunteer<')]
         self.assertEqual(order, sorted(order))
+
+    def test_join_pta_page_uses_flat_membership_payment_link(self):
+        settings = SiteSettings.objects.first()
+        settings.membership_payment_link = 'https://buy.stripe.com/test_membership'
+        settings.save()
+        response = self.client.get(reverse('pta:join_pta'))
+        self.assertContains(response, 'Join PTA')
+        self.assertContains(response, '$15')
+        self.assertContains(response, 'https://buy.stripe.com/test_membership')
+        self.assertContains(response, 'No-pressure belonging')
 
     def test_newsletter_page_lists_latest_issue_first(self):
         NewsletterIssue.objects.create(title='September Newsletter', issue_date=date(2026, 9, 1), summary='Older news', published=True)
@@ -122,3 +133,10 @@ class PublicSiteBehaviorTests(TestCase):
         self.assertContains(response, 'Book Coastal Coffee Co')
         self.assertContains(response, 'src="data:image/png;base64,')
         self.assertNotContains(response, '/media/sponsors/sponsor.png')
+
+    def test_existing_sponsor_logo_filename_renders_with_safe_fallback(self):
+        Sponsor.objects.create(name='The Creative Ice Company', logo='sponsors/creativeice.png', website='https://thecreativeicecompany.com/', active=True)
+        response = self.client.get(reverse('pta:fundraising'))
+        self.assertContains(response, 'The Creative Ice Company')
+        self.assertContains(response, 'src="/media/sponsors/creativeice.png"')
+        self.assertContains(response, 'image-fallback')

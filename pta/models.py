@@ -27,6 +27,8 @@ class SiteSettings(TimeStampedModel):
     attendance_url = models.URLField(blank=True)
     spirit_wear_url = models.URLField(blank=True)
     calendar_url = models.URLField(blank=True)
+    membership_fee = models.DecimalField(max_digits=6, decimal_places=2, default=15.00, help_text='Flat PTA membership amount shown on the Join PTA page.')
+    membership_payment_link = models.URLField(blank=True, help_text='Paste the Stripe Payment Link or checkout URL for the $15 PTA membership.')
     logo = models.ImageField(upload_to='site/', blank=True)
     mascot = models.ImageField(upload_to='site/', blank=True)
     def __str__(self): return self.pta_name
@@ -206,6 +208,11 @@ class Sponsor(TimeStampedModel):
             encoded = base64.b64encode(bytes(self.logo_data)).decode('ascii')
             content_type = self.logo_content_type or 'image/png'
             return f'data:{content_type};base64,{encoded}'
+        if self.logo:
+            try:
+                return self.logo.url
+            except Exception:
+                return ''
         return ''
 
     def __str__(self): return self.name

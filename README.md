@@ -112,6 +112,7 @@ The admin panel can manage:
 - volunteer interest submissions
 - resources and links
 - fundraising campaigns and Stripe Payment Links
+- PTA membership fee and membership Payment Link
 - site settings/contact links
 
 Client/admin users should use `/admin/` for weekly updates instead of editing code.
@@ -128,6 +129,7 @@ Client/admin users should use `/admin/` for weekly updates instead of editing co
   - `/fundraising/`
   - `/about-contact/`
 - Homepage announcements managed through admin
+- $15 Join PTA page with an admin-editable membership Payment Link
 - Announcement detail pages with QR sharing
 - Printable flyer pages for announcements
 - Newsletters sorted newest-first by date

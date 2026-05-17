@@ -40,7 +40,8 @@
         {% for sponsor in sponsors %}
         <article class="sponsor-card reveal">
           {% if sponsor.logo_src %}
-            <img src="{{ sponsor.logo_src }}" alt="{{ sponsor.name }} logo">
+            <img src="{{ sponsor.logo_src }}" alt="{{ sponsor.name }} logo" onerror="this.style.display='none';this.nextElementSibling.style.display='grid';">
+            <div class="sponsor-fallback image-fallback" aria-hidden="true">{{ sponsor.name|first }}</div>
           {% else %}
             <div class="sponsor-fallback" aria-hidden="true">{{ sponsor.name|first }}</div>
           {% endif %}
